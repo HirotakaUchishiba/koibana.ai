@@ -37,6 +37,11 @@ def conversation_chain_dependency() -> Callable[[], ConversationChain]:
 conversation_chain = conversation_chain_dependency()
 
 
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
 @app.post("/chat")
 async def chat(
     request: Request,
