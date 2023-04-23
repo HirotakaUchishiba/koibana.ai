@@ -1,5 +1,10 @@
+//Project import
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+
+//Package import
+import 'package:client/screens/register_name_screen/register_name_screen.dart';
+
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -87,7 +92,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            // Register logic here
+                            Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterNameScreen()),
+                );
                           }
                         },
                         child: const Text('登録'),
