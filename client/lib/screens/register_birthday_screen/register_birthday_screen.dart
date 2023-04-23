@@ -1,4 +1,5 @@
 import 'package:client/providers/birthday_provider.dart';
+import 'package:client/screens/register_sex_screen/register_sex_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -73,7 +74,12 @@ class RegisterBirthdayScreen extends HookConsumerWidget {
                       ),
                     ),
                     onPressed: () {
-                      // Save birthday to Firebase and navigate to next screen
+                      Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const RegisterSexScreen()),
+                            );
                     },
                     child: const Text('次へ'),
                   ),
