@@ -1,4 +1,6 @@
 //Package import
+//Project import
+import 'package:client/screens/signup_screen/signup_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -24,11 +26,17 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0,40,0,40),
+                      padding: const EdgeInsets.fromLTRB(0, 40, 0, 40),
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignupScreen()),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
                             foregroundColor: Colors.pinkAccent,
@@ -43,7 +51,8 @@ class HomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          child: const Text('はじめる', style:TextStyle(fontWeight: FontWeight.bold)),
+                          child: const Text('はじめる',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ),
