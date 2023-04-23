@@ -1,3 +1,4 @@
+import 'package:client/screens/register_birthday_screen/register_birthday_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -65,7 +66,11 @@ class RegisterNameScreen extends HookConsumerWidget {
                       ),
                     ),
                     onPressed: () {
-                      // Save name to Firebase and navigate to next screen
+                     Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>  RegisterBirthdayScreen()),
+                            );
                     },
                     child: const Text('次へ'),
                   ),
