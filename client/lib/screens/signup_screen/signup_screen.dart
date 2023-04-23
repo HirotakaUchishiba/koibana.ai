@@ -1,10 +1,8 @@
 //Project import
-import 'package:email_validator/email_validator.dart';
-import 'package:flutter/material.dart';
-
 //Package import
 import 'package:client/screens/register_name_screen/register_name_screen.dart';
-
+import 'package:email_validator/email_validator.dart';
+import 'package:flutter/material.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -23,7 +21,9 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-          title: const Text('新規登録',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black)),
+          title: const Text('新規登録',
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
           iconTheme: const IconThemeData(color: Colors.black),
           backgroundColor: Colors.transparent,
           elevation: 0),
@@ -35,7 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16,0,16,0),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -48,13 +48,14 @@ class _SignupScreenState extends State<SignupScreen> {
                           border: OutlineInputBorder(),
                           labelText: 'メールアドレス',
                           focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.pinkAccent, width: 2))),
+                              borderSide: BorderSide(
+                                  color: Colors.pinkAccent, width: 2))),
                       keyboardType: TextInputType.emailAddress,
                       onChanged: (value) => _email = value,
-                      validator: (value) => !EmailValidator.validate(value ?? '')
-                          ? '有効なメールアドレスを入力してください'
-                          : null,
+                      validator: (value) =>
+                          !EmailValidator.validate(value ?? '')
+                              ? '有効なメールアドレスを入力してください'
+                              : null,
                     ),
                     const SizedBox(
                       height: 20,
@@ -64,8 +65,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           border: OutlineInputBorder(),
                           labelText: 'パスワード',
                           focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.pinkAccent, width: 2))),
+                              borderSide: BorderSide(
+                                  color: Colors.pinkAccent, width: 2))),
                       obscureText: true,
                       onChanged: (value) => _password = value,
                       validator: (value) => (value == null || value.isEmpty)
@@ -93,9 +94,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterNameScreen()),
-                );
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const RegisterNameScreen()),
+                            );
                           }
                         },
                         child: const Text('登録'),
