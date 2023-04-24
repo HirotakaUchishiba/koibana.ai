@@ -1,3 +1,4 @@
+import 'package:client/screens/matching_screen/matching_sreen.dart';
 import 'package:flutter/material.dart';
 
 class RegisterInterestScreen extends StatefulWidget {
@@ -118,6 +119,11 @@ class _RegisterInterestScreenState extends State<RegisterInterestScreen> {
                     onPressed: _selectedInterests.isNotEmpty
                         ? () {
                             // Save interests to Firebase and navigate to next screen
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>  MatchingScreen()),
+                            );
                           }
                         : null,
                     child: const Text('次へ'),
