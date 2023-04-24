@@ -38,6 +38,7 @@ dependencies:
   email_validator: ^2.1.17
   riverpod: ^2.3.5
   hooks_riverpod: ^2.3.5
+  swipe_cards: ^2.0.0+1
 
 dev_dependencies:
   flutter_test:
