@@ -1,4 +1,5 @@
 import 'package:client/providers/user_sex_provider.dart';
+import 'package:client/screens/register_interest_screen/register_interest_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -80,7 +81,16 @@ class RegisterSexScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      onPressed: userSex != "" ? () {} : null,
+                      onPressed: userSex != ""
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        RegisterInterestScreen()),
+                              );
+                            }
+                          : null,
                       child: const Text('次へ'),
                     ),
                   ),
