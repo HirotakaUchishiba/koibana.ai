@@ -1,4 +1,6 @@
+import 'package:client/providers/user_id_provider.dart';
 import 'package:client/screens/register_birthday_screen/register_birthday_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -7,9 +9,20 @@ final nameProvider = StateProvider<String>((ref) => '');
 class RegisterNameScreen extends HookConsumerWidget {
   const RegisterNameScreen({super.key});
 
+  Future<void> updateName(String uid, String name) async {
+    print(uid);
+    if (uid != "") {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'name': name});
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(nameProvider);
+    final uid = ref.watch(userIdProvider.select((state) => state));
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -35,7 +48,7 @@ class RegisterNameScreen extends HookConsumerWidget {
               children: [
                 TextField(
                   onChanged: (value) {
-                    ref.read(nameProvider);
+                    ref.read(nameProvider.notifier).state = value;
                   },
                   decoration: const InputDecoration(
                     labelText: '名前',
@@ -65,12 +78,15 @@ class RegisterNameScreen extends HookConsumerWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                     Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>  RegisterBirthdayScreen()),
-                            );
+                    onPressed: () async {
+                      await updateName(
+                          uid!, ref.read(nameProvider.notifier).state);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const RegisterBirthdayScreen()),
+                      );
                     },
                     child: const Text('次へ'),
                   ),

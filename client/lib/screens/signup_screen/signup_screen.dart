@@ -1,25 +1,22 @@
-// Project import
-// Package import
+import 'package:client/providers/user_email_provider.dart';
+import 'package:client/providers/user_id_provider.dart';
+import 'package:client/providers/user_password_provider.dart';
 import 'package:client/screens/register_name_screen/register_name_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends HookConsumerWidget {
   const SignupScreen({super.key});
 
   @override
-  _SignupScreenState createState() => _SignupScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formKey = GlobalKey<FormState>();
+    String email = '';
+    String password = '';
 
-class _SignupScreenState extends State<SignupScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -44,7 +41,7 @@ class _SignupScreenState extends State<SignupScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Form(
-                key: _formKey,
+                key: formKey,
                 child: Column(
                   children: [
                     TextFormField(
@@ -59,7 +56,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      onChanged: (value) => _email = value,
+                      onChanged: (value) => email = value,
                       validator: (value) =>
                           !EmailValidator.validate(value ?? '')
                               ? '有効なメールアドレスを入力してください'
@@ -80,7 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                       obscureText: true,
-                      onChanged: (value) => _password = value,
+                      onChanged: (value) => password = value,
                       validator: (value) => (value == null || value.isEmpty)
                           ? 'パスワードを入力してください'
                           : null,
@@ -104,21 +101,32 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         ),
                         onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
+                          if (formKey.currentState!.validate()) {
                             try {
                               // Firebase Authenticationに登録
                               UserCredential userCredential = await FirebaseAuth
                                   .instance
                                   .createUserWithEmailAndPassword(
-                                      email: _email, password: _password);
+                                      email: email, password: password);
+
                               // Firestoreにユーザー情報を保存
                               await FirebaseFirestore.instance
                                   .collection('users')
                                   .doc(userCredential.user!.uid)
                                   .set({
-                                'email': _email,
+                                'email': email,
                                 'uid': userCredential.user!.uid,
                               });
+
+                              // プロバイダーにメールアドレスとパスワードをセット
+                              ref.read(emailProvider.notifier).state = email;
+                              ref.read(passwordProvider.notifier).state =
+                                  password;
+
+                              // プロバイダーにユーザーIDをセット
+                              ref.read(userIdProvider.notifier).state =
+                                  userCredential.user!.uid;
+
                               // 次の画面へ遷移
                               Navigator.push(
                                 context,
