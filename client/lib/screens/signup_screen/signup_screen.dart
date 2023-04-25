@@ -1,7 +1,9 @@
-//Project import
-//Package import
+// Project import
+// Package import
 import 'package:client/screens/register_name_screen/register_name_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -21,12 +23,14 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-          title: const Text('新規登録',
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-          iconTheme: const IconThemeData(color: Colors.black),
-          backgroundColor: Colors.transparent,
-          elevation: 0),
+        title: const Text(
+          '新規登録',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -45,11 +49,15 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     TextFormField(
                       decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'メールアドレス',
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Colors.pinkAccent, width: 2))),
+                        border: OutlineInputBorder(),
+                        labelText: 'メールアドレス',
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.pinkAccent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
                       keyboardType: TextInputType.emailAddress,
                       onChanged: (value) => _email = value,
                       validator: (value) =>
@@ -62,11 +70,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     TextFormField(
                       decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'パスワード',
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Colors.pinkAccent, width: 2))),
+                        border: OutlineInputBorder(),
+                        labelText: 'パスワード',
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.pinkAccent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
                       obscureText: true,
                       onChanged: (value) => _password = value,
                       validator: (value) => (value == null || value.isEmpty)
@@ -91,14 +103,39 @@ class _SignupScreenState extends State<SignupScreen> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RegisterNameScreen()),
-                            );
+                            try {
+                              // Firebase Authenticationに登録
+                              UserCredential userCredential = await FirebaseAuth
+                                  .instance
+                                  .createUserWithEmailAndPassword(
+                                      email: _email, password: _password);
+                              // Firestoreにユーザー情報を保存
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(userCredential.user!.uid)
+                                  .set({
+                                'email': _email,
+                                'uid': userCredential.user!.uid,
+                              });
+                              // 次の画面へ遷移
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RegisterNameScreen()),
+                              );
+                            } on FirebaseAuthException catch (e) {
+                              if (e.code == 'weak-password') {
+                                print('The password provided is too weak.');
+                              } else if (e.code == 'email-already-in-use') {
+                                print(
+                                    'The account already exists for that email.');
+                              }
+                            } catch (e) {
+                              print(e);
+                            }
                           }
                         },
                         child: const Text('登録'),
