@@ -1,7 +1,10 @@
+import 'package:client/providers/user_Id_provider.dart';
 import 'package:client/providers/user_sex_provider.dart';
 import 'package:client/screens/register_interest_screen/register_interest_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class RegisterSexScreen extends StatelessWidget {
   const RegisterSexScreen({Key? key}) : super(key: key);
@@ -29,6 +32,7 @@ class RegisterSexScreen extends StatelessWidget {
           child: Consumer(
             builder: (context, ref, child) {
               final userSex = ref.watch(userSexProvider);
+              final uid = ref.read(userIdProvider.notifier).state;
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -82,12 +86,18 @@ class RegisterSexScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: userSex != ""
-                          ? () {
+                          ? () async {
+                              // Firestoreに性別情報を追加
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(uid)
+                                  .update({'sex': userSex});
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        RegisterInterestScreen()),
+                                        const RegisterInterestScreen()),
                               );
                             }
                           : null,

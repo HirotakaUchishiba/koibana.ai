@@ -80,7 +80,7 @@ class RegisterNameScreen extends HookConsumerWidget {
                     ),
                     onPressed: () async {
                       await updateName(
-                          uid!, ref.read(nameProvider.notifier).state);
+                          uid, ref.read(nameProvider.notifier).state);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
