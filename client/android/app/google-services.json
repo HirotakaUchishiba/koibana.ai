@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "338461090687",
+    "project_id": "koibana-ai-c9ac1",
+    "storage_bucket": "koibana-ai-c9ac1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:338461090687:android:eed48e35b2a516f8b7b04a",
+        "android_client_info": {
+          "package_name": "com.example.client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "338461090687-re49ahkrfh4g1117crfgfkqjlj6ek8cd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCttHvFkx3pIjo8nqV84EWGuMLihhM3dz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "338461090687-re49ahkrfh4g1117crfgfkqjlj6ek8cd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
