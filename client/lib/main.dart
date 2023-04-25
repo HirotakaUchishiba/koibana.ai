@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:client/providers/user_id_provider.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

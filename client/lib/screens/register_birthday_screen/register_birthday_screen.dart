@@ -1,11 +1,24 @@
 import 'package:client/providers/birthday_provider.dart';
+import 'package:client/providers/user_id_provider.dart';
 import 'package:client/screens/register_sex_screen/register_sex_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class RegisterBirthdayScreen extends HookConsumerWidget {
   const RegisterBirthdayScreen({super.key});
+
+  Future<void> updateBirthday(WidgetRef ref, DateTime birthday) async {
+    final uid = ref.read(userIdProvider.notifier).state;
+
+    if (uid != "") {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'birthday': birthday});
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,13 +49,11 @@ class RegisterBirthdayScreen extends HookConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildTextField(context, ref, '年', birthday.year,
-                        (value) {
+                    _buildTextField(context, ref, '年', birthday.year, (value) {
                       ref.read(birthdayProvider.notifier).updateYear(value);
                     }),
                     const SizedBox(width: 8),
-                    _buildTextField(context, ref, '月', birthday.month,
-                        (value) {
+                    _buildTextField(context, ref, '月', birthday.month, (value) {
                       ref.read(birthdayProvider.notifier).updateMonth(value);
                     }),
                     const SizedBox(width: 8),
@@ -73,13 +84,18 @@ class RegisterBirthdayScreen extends HookConsumerWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      DateTime birthDate = DateTime(
+                        birthday.year,
+                        birthday.month,
+                        birthday.day,
+                      );
+                      await updateBirthday(ref, birthDate);
                       Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RegisterSexScreen()),
-                            );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const RegisterSexScreen()),
+                      );
                     },
                     child: const Text('次へ'),
                   ),

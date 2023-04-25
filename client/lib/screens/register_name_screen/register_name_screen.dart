@@ -1,6 +1,6 @@
+import 'package:client/providers/user_id_provider.dart';
 import 'package:client/screens/register_birthday_screen/register_birthday_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -9,12 +9,12 @@ final nameProvider = StateProvider<String>((ref) => '');
 class RegisterNameScreen extends HookConsumerWidget {
   const RegisterNameScreen({super.key});
 
-  Future<void> updateName(String name) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+  Future<void> updateName(String uid, String name) async {
+    print(uid);
+    if (uid != "") {
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.uid)
+          .doc(uid)
           .update({'name': name});
     }
   }
@@ -22,6 +22,7 @@ class RegisterNameScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(nameProvider);
+    final uid = ref.watch(userIdProvider.select((state) => state));
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -78,7 +79,8 @@ class RegisterNameScreen extends HookConsumerWidget {
                       ),
                     ),
                     onPressed: () async {
-                      await updateName(ref.read(nameProvider.notifier).state);
+                      await updateName(
+                          uid!, ref.read(nameProvider.notifier).state);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
