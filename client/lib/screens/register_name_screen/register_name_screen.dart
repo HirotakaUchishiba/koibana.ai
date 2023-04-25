@@ -1,4 +1,6 @@
 import 'package:client/screens/register_birthday_screen/register_birthday_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -6,6 +8,16 @@ final nameProvider = StateProvider<String>((ref) => '');
 
 class RegisterNameScreen extends HookConsumerWidget {
   const RegisterNameScreen({super.key});
+
+  Future<void> updateName(String name) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'name': name});
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,7 +47,7 @@ class RegisterNameScreen extends HookConsumerWidget {
               children: [
                 TextField(
                   onChanged: (value) {
-                    ref.read(nameProvider);
+                    ref.read(nameProvider.notifier).state = value;
                   },
                   decoration: const InputDecoration(
                     labelText: '名前',
@@ -65,12 +77,14 @@ class RegisterNameScreen extends HookConsumerWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                     Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>  RegisterBirthdayScreen()),
-                            );
+                    onPressed: () async {
+                      await updateName(ref.read(nameProvider.notifier).state);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const RegisterBirthdayScreen()),
+                      );
                     },
                     child: const Text('次へ'),
                   ),
