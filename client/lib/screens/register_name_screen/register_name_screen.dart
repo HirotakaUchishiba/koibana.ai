@@ -10,7 +10,7 @@ class RegisterNameScreen extends HookConsumerWidget {
   const RegisterNameScreen({super.key});
 
   Future<void> updateName(String uid, String name) async {
-    print(uid);
+    print("nameScreenのuidは:"+ uid);
     if (uid != "") {
       await FirebaseFirestore.instance
           .collection('users')
@@ -22,7 +22,7 @@ class RegisterNameScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(nameProvider);
-    final uid = ref.watch(userIdProvider.select((state) => state));
+    final uid = ref.read(userIdProvider);
 
     return Scaffold(
       extendBodyBehindAppBar: true,

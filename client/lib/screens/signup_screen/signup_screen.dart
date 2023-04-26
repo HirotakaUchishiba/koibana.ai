@@ -124,9 +124,9 @@ class SignupScreen extends HookConsumerWidget {
                                   password;
 
                               // プロバイダーにユーザーIDをセット
-                              ref.read(userIdProvider.notifier).state =
+                              final uid = ref.read(userIdProvider.notifier).state =
                                   userCredential.user!.uid;
-
+                              print("セットされたuid:" + uid);
                               // 次の画面へ遷移
                               Navigator.push(
                                 context,
@@ -135,12 +135,8 @@ class SignupScreen extends HookConsumerWidget {
                                         const RegisterNameScreen()),
                               );
                             } on FirebaseAuthException catch (e) {
-                              if (e.code == 'weak-password') {
-                                print('The password provided is too weak.');
-                              } else if (e.code == 'email-already-in-use') {
-                                print(
-                                    'The account already exists for that email.');
-                              }
+                              if (e.code == 'パスワードが短すぎます。') {
+                              } else if (e.code == 'そのメールアドレスはすでに使われています。') {}
                             } catch (e) {
                               print(e);
                             }

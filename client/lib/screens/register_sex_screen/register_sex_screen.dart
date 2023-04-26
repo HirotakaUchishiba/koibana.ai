@@ -6,11 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class RegisterSexScreen extends StatelessWidget {
+class RegisterSexScreen extends HookConsumerWidget {
   const RegisterSexScreen({Key? key}) : super(key: key);
 
+  Future<void> updateSex(WidgetRef ref, String userSex) async {
+    final uid = ref.read(userIdProvider);
+    print("userSexの値は:" + userSex);
+    print("sexScreenのuidは:" + uid!);
+    if (uid != "") {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'sex': userSex});
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -32,7 +44,6 @@ class RegisterSexScreen extends StatelessWidget {
           child: Consumer(
             builder: (context, ref, child) {
               final userSex = ref.watch(userSexProvider);
-              final uid = ref.read(userIdProvider.notifier).state;
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -87,12 +98,7 @@ class RegisterSexScreen extends StatelessWidget {
                       ),
                       onPressed: userSex != ""
                           ? () async {
-                              // Firestoreに性別情報を追加
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(uid)
-                                  .update({'sex': userSex});
-
+                              await updateSex(ref, userSex);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
