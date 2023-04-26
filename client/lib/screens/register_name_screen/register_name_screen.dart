@@ -1,16 +1,15 @@
+import 'package:client/providers/name_provider.dart';
 import 'package:client/providers/user_id_provider.dart';
 import 'package:client/screens/register_birthday_screen/register_birthday_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final nameProvider = StateProvider<String>((ref) => '');
-
 class RegisterNameScreen extends HookConsumerWidget {
   const RegisterNameScreen({super.key});
 
   Future<void> updateName(String uid, String name) async {
-    print("nameScreenのuidは:"+ uid);
+    print("nameScreenのuidは:" + uid);
     if (uid != "") {
       await FirebaseFirestore.instance
           .collection('users')

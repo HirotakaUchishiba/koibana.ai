@@ -1,6 +1,9 @@
+import 'package:client/providers/name_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:swipe_cards/swipe_cards.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // 追加
+import 'package:hooks_riverpod/hooks_riverpod.dart'; // 追加
 
 class MatchingScreen extends StatefulWidget {
   const MatchingScreen({super.key});
@@ -43,29 +46,35 @@ class _MatchingScreenState extends State<MatchingScreen> {
                   // マッチングチェック
                   DocumentSnapshot userDoc = await FirebaseFirestore.instance
                       .collection('users')
-                      .doc(user['username'])
+                      .doc(user['uid']) // 変更
                       .get();
+                  print("とってきたuidの値は:" + user['uid']);
                   if (userDoc.exists) {
-                    List likedBy = (userDoc.data() as Map<String, dynamic>)?['likedBy'] ?? [];
-                    String myUsername = '自分のユーザーネーム'; // 自分のユーザーネームを設定する
+                    List likedBy =
+                        (userDoc.data() as Map<String, dynamic>)?['likedBy'] ??
+                            [];
+
+                    //FIXME: nameProviderから自分のユーザーネームを取得。ここをcontext.read以外でデータを取得できないか調査する
+                    // final myUsername = context.read(nameProvider).state;
+                    final myUsername = "testData";
 
                     if (likedBy.contains(myUsername)) {
                       // 相手が自分をLIKEしていた場合
                       showMatchDialog(context);
-                      await createMatch(myUsername, user['username']);
+                      await createMatch(myUsername, user['uid']); // 変更
 
                       // 自分のユーザードキュメントから相手を likedBy から削除する
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(myUsername)
+                          .doc(user['uid'])
                           .update({
-                        'likedBy': FieldValue.arrayRemove([user['username']])
+                        'likedBy': FieldValue.arrayRemove([user['uid']]) // 変更
                       });
                     } else {
                       // 相手が自分をLIKEしていなかった場合
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(user['username'])
+                          .doc(user['uid']) // 変更
                           .update({
                         'likes': FieldValue.arrayUnion([myUsername])
                       });

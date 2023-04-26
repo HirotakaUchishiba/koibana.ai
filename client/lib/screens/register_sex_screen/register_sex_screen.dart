@@ -12,7 +12,7 @@ class RegisterSexScreen extends HookConsumerWidget {
   Future<void> updateSex(WidgetRef ref, String userSex) async {
     final uid = ref.read(userIdProvider);
     print("userSexの値は:" + userSex);
-    print("sexScreenのuidは:" + uid!);
+    print("sexScreenのuidは:" + uid);
     if (uid != "") {
       await FirebaseFirestore.instance
           .collection('users')
