@@ -10,8 +10,8 @@ class RegisterBirthdayScreen extends HookConsumerWidget {
   const RegisterBirthdayScreen({super.key});
 
   Future<void> updateBirthday(WidgetRef ref, DateTime birthday) async {
-    final uid = ref.read(userIdProvider.notifier).state;
-
+    final uid = ref.read(userIdProvider);
+    print("birthdayScreenのuidは:" + uid);
     if (uid != "") {
       await FirebaseFirestore.instance
           .collection('users')
@@ -85,6 +85,7 @@ class RegisterBirthdayScreen extends HookConsumerWidget {
                       ),
                     ),
                     onPressed: () async {
+                     
                       DateTime birthDate = DateTime(
                         birthday.year,
                         birthday.month,
@@ -94,7 +95,7 @@ class RegisterBirthdayScreen extends HookConsumerWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const RegisterSexScreen()),
+                            builder: (context) => RegisterSexScreen()),
                       );
                     },
                     child: const Text('次へ'),
