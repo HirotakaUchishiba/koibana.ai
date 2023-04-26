@@ -37,20 +37,115 @@ class _MatchingScreenState extends State<MatchingScreen> {
             .map(
               (user) => SwipeItem(
                 content: user,
-                likeAction: () {
+                likeAction: () async {
                   print("Like");
+
+                  // マッチングチェック
+                  DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user['username'])
+                      .get();
+                  if (userDoc.exists) {
+                    List likedBy = (userDoc.data() as Map<String, dynamic>)?['likedBy'] ?? [];
+                    String myUsername = '自分のユーザーネーム'; // 自分のユーザーネームを設定する
+
+                    if (likedBy.contains(myUsername)) {
+                      // 相手が自分をLIKEしていた場合
+                      showMatchDialog(context);
+                      await createMatch(myUsername, user['username']);
+
+                      // 自分のユーザードキュメントから相手を likedBy から削除する
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(myUsername)
+                          .update({
+                        'likedBy': FieldValue.arrayRemove([user['username']])
+                      });
+                    } else {
+                      // 相手が自分をLIKEしていなかった場合
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user['username'])
+                          .update({
+                        'likes': FieldValue.arrayUnion([myUsername])
+                      });
+                    }
+                  }
                 },
                 nopeAction: () {
                   print("Nope");
-                },
-                superlikeAction: () {
-                  print("Superlike");
                 },
               ),
             )
             .toList(),
       );
     });
+  }
+
+  Future<void> showMatchDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('おめでとうございます！'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('マッチしました！'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> createMatch(String user1, String user2) async {
+    CollectionReference matchesRef =
+        FirebaseFirestore.instance.collection('matches');
+
+    // マッチドキュメントを作成する
+    DocumentReference matchDocRef = await matchesRef.add({
+      'user1': user1,
+      'user2': user2,
+    });
+
+    // 両者のドキュメントにマッチ情報を追加する
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user1)
+        .collection('matches')
+        .doc(matchDocRef.id)
+        .set({'matchId': matchDocRef.id, 'user1': user1, 'user2': user2});
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user2)
+        .collection('matches')
+        .doc(matchDocRef.id)
+        .set({'matchId': matchDocRef.id, 'user1': user1, 'user2': user2});
+
+    // 両者のドキュメントにメッセージサブコレクションを作成する
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user1)
+        .collection('messages')
+        .add({});
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user2)
+        .collection('messages')
+        .add({});
   }
 
   @override
