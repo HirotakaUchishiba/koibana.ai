@@ -1,4 +1,6 @@
 You can get api document at http://localhost:8000/docs after you load the server.
+
+
 You have to create a database at postgresql, Using:
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
