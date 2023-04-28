@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
-from sqlalchemy.orm import sessionmaker, relationship, session
+from sqlalchemy.orm import sessionmaker, relationship, session, joinedload
 from sqlalchemy.orm import declarative_base
 from passlib.context import CryptContext
 from typing import Optional, List
@@ -57,7 +57,6 @@ def create_user(user: UserCreate):
     try:
         hashed_password = pwd_context.hash(user.password)
         db_user = User(username=user.username, email=user.email, full_name=user.full_name, hashed_password=hashed_password)
-        print(db_user)
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
@@ -65,6 +64,19 @@ def create_user(user: UserCreate):
     except:
         db.rollback()
         raise HTTPException(status_code=400, detail="Username already registered")
+    finally:
+        db.close()
+
+@app.get("/users/{user_id}")
+async def get_user(user_id: int):
+    db = SessionLocal()
+    try:
+        db_user = db.query(User).options(joinedload(User.hobbies)).filter(User.id == user_id).first()
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        return db_user
+    except:
+        raise HTTPException(status_code=400, detail="Error Getting User")
     finally:
         db.close()
 
@@ -100,7 +112,7 @@ def read_hobbies_for_user(user_id: int):
         db.close()
 
 @app.get("/users_by_hobby/{hobby_name}")
-async def get_users_by_hobby(hobby_name: str):
+def get_users_by_hobby(hobby_name: str):
     db = SessionLocal()
     users = get_users_with_same_hobby(db, hobby_name)
     return users
