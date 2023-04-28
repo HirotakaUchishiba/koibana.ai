@@ -106,13 +106,8 @@ async def get_users_by_hobby(hobby_name: str):
     return users
 
 def get_users_with_same_hobby(db: session, hobby_name: str):
-    # 查询拥有指定兴趣的所有Hobby记录
     hobbies = db.query(Hobby).filter_by(name=hobby_name).all()
-
-    # 提取Hobby记录中的用户ID
     user_ids = [hobby.user_id for hobby in hobbies]
-
-    # 查询所有拥有该兴趣的用户
     users = db.query(User).filter(User.id.in_(user_ids)).all()
 
     return users
