@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, relationship, session, joinedload
 from sqlalchemy.orm import declarative_base
 from passlib.context import CryptContext
@@ -8,16 +8,16 @@ from pydantic import BaseModel
 import openai
 
 
-openai.api_key = "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"
+# openai.api_key = "sk-xxxx"
 
 app = FastAPI()
 
-Base = declarative_base()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 DATABASE_URL = "postgresql://postgres:pgsqlpw@localhost:5432/user_data"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
 
 class Question(BaseModel):
     question: str
@@ -48,6 +48,11 @@ class UserCreate(BaseModel):
 class HobbyCreate(BaseModel):
     name: str
     description: Optional[str] = None
+
+class ChatMessage(BaseModel):
+    sender_id: int
+    receiver_id: int
+    message: str
 
 Base.metadata.create_all(bind=engine)
 
@@ -117,9 +122,57 @@ def get_users_by_hobby(hobby_name: str):
     users = get_users_with_same_hobby(db, hobby_name)
     return users
 
+@app.post("/chat/{sender_id}/{receiver_id}")
+def create_chat_message(sender_id: int, receiver_id: int, message: ChatMessage):
+    tablename = f"chat_{min(sender_id, receiver_id)}_{max(sender_id, receiver_id)}"
+    create_table_if_not_exists(tablename)
+
+    class ChatRecord(Base):
+        __tablename__ = tablename
+
+        id = Column(Integer, primary_key=True)
+        sender_id = Column(Integer, ForeignKey('users.id'))
+        receiver_id = Column(Integer, ForeignKey('users.id'))
+        message = Column(String)
+
+        sender = relationship("User", foreign_keys=[sender_id])
+        receiver = relationship("User", foreign_keys=[receiver_id])
+
+    db = SessionLocal()
+
+    chat_record = ChatRecord(sender_id=sender_id, receiver_id=receiver_id, message=message.message)
+
+    db.add(chat_record)
+    db.commit()
+    db.refresh(chat_record)
+
+    return {"chat_record_id": chat_record.id}
+
+@app.post("/get-answer")
+async def get_answer(question: Question):
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=f"私は恋愛助手です。これから、女の子に返信することを助けます。彼女は何を送りますか？\n\nQ:{question.question}\nA:",
+        temperature=0,
+        max_tokens=100,
+        top_p=1,
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
+        stop=["\n"]
+    )
+
+    response_text = response.choices[0].text
+
+    return response_text
+
 def get_users_with_same_hobby(db: session, hobby_name: str):
     hobbies = db.query(Hobby).filter_by(name=hobby_name).all()
     user_ids = [hobby.user_id for hobby in hobbies]
     users = db.query(User).filter(User.id.in_(user_ids)).all()
 
     return users
+
+def create_table_if_not_exists(tablename):
+    if not engine.dialect.has_table(engine, tablename):
+        Base.metadata.tables[tablename].create(engine)
+
