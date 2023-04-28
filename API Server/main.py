@@ -68,23 +68,6 @@ def create_user(user: UserCreate):
     finally:
         db.close()
 
-@app.post("/usertype/")
-def user_type(user: UserCreate):
-    db = SessionLocal()
-    try:
-        hashed_password = pwd_context.hash(user.password)
-        db_user = User(username=user.username, email=user.email, full_name=user.full_name, hashed_password=hashed_password)
-        print(db_user)
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    except:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Username already registered")
-    finally:
-        db.close()
-
 @app.post("/users/{user_id}/hobbies/")
 def create_hobby_for_user(user_id: int, hobby: HobbyCreate):
     db = SessionLocal()
@@ -103,18 +86,18 @@ def create_hobby_for_user(user_id: int, hobby: HobbyCreate):
     finally:
         db.close()
 
-# @app.get("/users/{user_id}/hobbies/", response_model=List[Hobby])
-# def read_hobbies_for_user(user_id: int):
-#     db = SessionLocal()
-#     try:
-#         db_user = db.query(User).filter(User.id == user_id).first()
-#         if db_user is None:
-#             raise HTTPException(status_code=404, detail="User not found")
-#         return db_user.hobbies
-#     except:
-#         raise HTTPException(status_code=400, detail="Error reading hobbies")
-#     finally:
-#         db.close()
+@app.get("/users/{user_id}/hobbies/", response_model=List[Hobby])
+def read_hobbies_for_user(user_id: int):
+    db = SessionLocal()
+    try:
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        return db_user.hobbies
+    except:
+        raise HTTPException(status_code=400, detail="Error reading hobbies")
+    finally:
+        db.close()
 
 @app.post("/get-answer")
 async def get_answer(question: Question):
