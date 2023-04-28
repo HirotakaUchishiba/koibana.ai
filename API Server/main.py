@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, session
 from sqlalchemy.orm import declarative_base
 from passlib.context import CryptContext
 from typing import Optional, List
@@ -86,7 +86,7 @@ def create_hobby_for_user(user_id: int, hobby: HobbyCreate):
     finally:
         db.close()
 
-@app.get("/users/{user_id}/hobbies/", response_model=List[Hobby])
+@app.get("/users/{user_id}/hobbies/", response_model=List[HobbyCreate])
 def read_hobbies_for_user(user_id: int):
     db = SessionLocal()
     try:
@@ -99,20 +99,20 @@ def read_hobbies_for_user(user_id: int):
     finally:
         db.close()
 
-@app.post("/get-answer")
-async def get_answer(question: Question):
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=f"私は恋愛助手です。これから、女の子に返信することを助けます。彼女は何を送りますか？\n\nQ:{question.question}\nA:",
-        temperature=0,
-        max_tokens=100,
-        top_p=1,
-        frequency_penalty=0.0,
-        presence_penalty=0.0,
-        stop=["\n"]
-    )
+@app.get("/users_by_hobby/{hobby_name}")
+async def get_users_by_hobby(hobby_name: str):
+    db = SessionLocal()
+    users = get_users_with_same_hobby(db, hobby_name)
+    return users
 
-    response_text = response.choices[0].text
+def get_users_with_same_hobby(db: session, hobby_name: str):
+    # 查询拥有指定兴趣的所有Hobby记录
+    hobbies = db.query(Hobby).filter_by(name=hobby_name).all()
 
-    return response_text
+    # 提取Hobby记录中的用户ID
+    user_ids = [hobby.user_id for hobby in hobbies]
 
+    # 查询所有拥有该兴趣的用户
+    users = db.query(User).filter(User.id.in_(user_ids)).all()
+
+    return users
